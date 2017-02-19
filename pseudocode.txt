@@ -1,0 +1,141 @@
+## Takes optional command line arguments for input files other than
+## the default imp2input.txt and imp2cost.txt
+main function (argc, argv[]) 
+	if number of arguments > 1
+		cost file = second argument
+		input file = third argument
+	else, define cost and input files as the given defaults
+		cost file = imp2cost.txt
+		input file = imp2input.txt
+	
+	open cost file for reading:
+	read each number into a 2D array of ints, cost_table(5 by 5 is enough since
+	the alphabet is constant and known)
+	close cost file
+
+	open input file for reading:
+	for each line in input file:
+		parse the characters from the start of the line to the comma into
+		a string, str1
+		parse the characters after the comma to the newline into a string,
+		str2
+
+		declare 2D array of ints to hold distances, ed_table, of size
+		(m + 1) X (n + 1), where m is length of str1 and n is length of
+		str2
+		declare 2D array of chars to hold operation types 'd', 'i', and
+		'a', bt_table (backtrace table). Size is same as ed_table 
+		declare 1D array of strings to hold the pair of alignments,
+		alignment
+
+		# code for timing the algorithm goes here #
+		ed_table = fill_in_edit_distance_table(str1, str2, cost_table,
+											   bt_table)
+		alignment = get_alignment(str1, str2, ed_table, bt_table)
+		# code for timing the algorithm goes here #
+		
+		open output file for writing:
+		append line to file: alignment[0],alignment[1]:ed_table[m][n]
+		close output file
+
+	close input file
+
+
+## Returns edit distance table. Takes in the two strings to be compared,
+## the cost table, and an empty backtrace table to fill in
+fill_in_edit_distance_table(str1, str2, cost_table, bt_table) 
+	base cases:
+	for i = 0 to m: (deletions)
+		ed_table[i][0] = i * find_cost(str1[i], '-', cost_table)
+		bt_table[i][0] = 'd'
+	for j = 1 to n: (insertions)
+		ed_table[i][0] = j * find_cost('-', str2[j], cost_table)
+		bt_table[i][0] = 'i'
+
+	main algorithm:
+	for i = 1, ..., m:
+		for j = 1, ..., n:
+			Find the costs of deletion, insertion, and alignment for this
+			particular pair of characters, str1[i] and str2[j]:
+			cost_d = find_cost(str1[i], '-', cost_table)
+			cost_i = find_cost('-', str2[j], cost_table)
+			cost_a = find_cost(str1[i], str2[j], cost_table)
+
+			Choose best edit distance for pair:
+			table[i][j] = min(
+				min(ed_table[i-1][j] + cost_d, ed_table[i][j-1]) + cost_i),
+				ed_table[i-1][j-1] + cost_a
+			)
+
+			Record operation for backtrace:
+			if ed_table[i][j] == ed_table[i-1][j] + cost_d:
+				bt_table[i][j] = 'd'
+			else if ed_table[i][j] == ed_table[i][j-1] + cost_i:
+				bt_table[i][j] = 'i'
+			else (alignment/substitution/diagonal)
+				bt_table[i][j] = 'a'
+
+	return ed_table, the entire edit distance table. Best edit distance is
+	ed_table[m][n]
+
+
+## Returns pair of alignments (1D array of strings). Takes in the two strings
+## that were compared, the completed edit distance table, and the complete
+## backtrace table
+get_alignment(str1, str2, ed_table, bt_table):
+	declare 1D array of strings (capacity for two strings), alignment
+	declare string align1, of size m+n and initialized to '\0's or something
+	declare string align2, of size m+n and initialized to '\0's or something
+	declare int i = length of str1; represents ed/bt_table row index
+	declare int j = length of str2; represents ed/bt_table column index
+	declare int new1 = m+n-1, index of character in align1
+	declare int new2 = m+n-1, index of character in align2
+	declare int old1 = m-1: index of character in str1
+	declare int old2 = n-1: index of character in str2
+
+	while (i != 0 && j != 0), i.e. while we're not at the (0,0) square of the
+	edit distance table:
+		if bt_table[i][j] == 'd', it was a deletion
+			align1[new1] = str1[old1], new string keeps old string's char
+			align2[new2] = '-', new string gets a '-'
+			Move on to next character: i--, new1--, new2--, old1--
+		if bt_table[i][j] == 'i', it was an insertion
+			align1[new1] = '-', new string gets a '-'
+			align2[new2] = str2[old2], new string gets old string's char
+			Move on to next character: j--, new1--, new2--, old2--
+		if bt_table[i][j] == 'a', it was an alignment
+			align1[new1] = str1[old1], new string keeps old string's char
+			align2[new2] = str2[old2], new string keeps old string's char
+			Move on to next character: i--, j--, new1--, new2--, old1--, old2--
+	
+	alignment[0] = align1
+	alignment[1] = align2
+
+	return alignment
+
+
+## Looks up and returns the cost for a particular pair of characters. Takes in
+## the two characters to be compared and the cost table as arguments
+find_cost(char1, char2, cost_table)
+	string alpha = "-ATGC"
+	int idx1, idx2
+	
+	Scan each character of alpha:
+		if char1 equals a character in alpha, idx1 = alpha's current index
+		if char2 equals a character in alpha, idx2 = alpha's current index
+	
+	return cost_table[idx1][idx2]
+
+
+## Creates and returns uninitialized, dynamic 2D array of ints
+create_2D_array(m, n)
+	make 2D array: allocate m rows
+	for each row, allocate n cells
+	return array
+
+
+## Creates and returns uninitialized, dynamic 2D array of characters
+create_2D_array(m, n)
+	make 2D array: allocate m rows
+	for each row, allocate n cells
+	return array
