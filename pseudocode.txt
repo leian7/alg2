@@ -49,8 +49,8 @@ fill_in_edit_distance_table(str1, str2, cost_table, bt_table)
 		ed_table[i][0] = i * find_cost(str1[i], '-', cost_table)
 		bt_table[i][0] = 'd'
 	for j = 1 to n: (insertions)
-		ed_table[i][0] = j * find_cost('-', str2[j], cost_table)
-		bt_table[i][0] = 'i'
+		ed_table[0][j] = j * find_cost('-', str2[j], cost_table)
+		bt_table[0][j] = 'i'
 
 	main algorithm:
 	for i = 1, ..., m:
