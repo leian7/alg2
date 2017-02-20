@@ -15,6 +15,7 @@ void print_char_grid(int, int, char**);
 void print_string_grid(int, string**);
 int find_cost(char,char,int**);
 
+
 int main(int argc, char** argv) {
 	string cost_file;
 	string input_file;
@@ -105,12 +106,15 @@ int main(int argc, char** argv) {
 	 * a num_pairs x 2 array of just strings. Commas are printed out for
 	 * readability.
 	 */
+
 	//cout << "PRINTING THE SEQ TABLE " << endl;	
 	//print_string_grid(count, sequence_table);
 	//cout << "DONE PRINTING THE SEQ TABLE" << endl;
 	
 	int cost = find_cost('G', '-', cost_table);
 	cout << "Finding cost in table : " << cost << endl;
+
+
 
 	free_int_grid(5, 5, cost_table);
 	free_string_grid(count, sequence_table);
@@ -213,6 +217,7 @@ void print_string_grid(int num_pairs, string** arr) {
 }
 
 
+
 int find_cost(char one, char two, int** cost_table){
 	int idx1 = 0, idx2 = 0;
 	string alpha = "-ATGC";
@@ -226,3 +231,4 @@ int find_cost(char one, char two, int** cost_table){
 	}
 	return cost_table[idx1][idx2];
 }
+
