@@ -213,7 +213,7 @@ void free_string_grid(int num_pairs, string** arr) {
 void print_int_grid(int m, int n, int** arr) {
 	for (int i = 0; i < m; i++) {
 		for (int j = 0; j < n; j++) {
-			cout << arr[i][j] << "	";
+			cout << arr[i][j] << ",";
 		}
 		cout << endl;
 	}
@@ -319,9 +319,9 @@ int **fill_test_in_edit_distance_table(string str1, string str2, int **cost_tabl
 		for (int j = 1; j < n; j++){
 			//Find the costs of deletion, insertion, and alignment for this particular pair of characters, str1[i] and str2[j]:		
 
-			cost_d = find_test_cost(str1[i], '-', cost_table);
-			cost_i = find_test_cost('-', str2[j], cost_table);
-			cost_a = find_test_cost(str1[i], str2[j], cost_table);
+			cost_d = find_test_cost(str1[i-1], '-', cost_table);
+			cost_i = find_test_cost('-', str2[j-1], cost_table);
+			cost_a = find_test_cost(str1[i-1], str2[j-1], cost_table);
 			//cout << " cost_d, cost_i, cost_a : " << cost_d << cost_i << cost_a << endl;
 			//Choose best edit distance for pair:
 			ed_table[i][j] = minimum(ed_table[i-1][j] + cost_d , ed_table[i][j-1] + cost_i , ed_table[i-1][j-1] + cost_a);
