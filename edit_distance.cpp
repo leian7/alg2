@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <string.h>
 #include <fstream>
 using namespace std;
 
@@ -14,6 +15,7 @@ void print_int_grid(int, int, int**);
 void print_char_grid(int, int, char**);
 void print_string_grid(int, string**);
 int find_cost(char,char,int**);
+string* get_alignment(string, string, int**, char**);
 
 
 int main(int argc, char** argv) {
@@ -114,11 +116,62 @@ int main(int argc, char** argv) {
 	int cost = find_cost('G', '-', cost_table);
 	cout << "Finding cost in table : " << cost << endl;
 
+	/* DELETE LATER: read in dummy ed_table for testing */
+	row = 0; column = 0;
+	int** ed_table = create_int_grid(11+1, 10+1);
+	f.open("test_ed_table.txt");
+	ch = f.peek();								// peek at first char
+	while (ch != EOF) {
+		if (isdigit(ch)) {						// if char starts a number,
+			f >> number;						// read entire number
+			ed_table[row][column] = number;		// place in int grid
+			column++;							// move on to next square
+			if (column >= 11) {					// if end of row,
+				column = 0;
+				row++;							// move on to next row
+			}
+		}
+		else {
+			ch = f.get();						// otherwise: ignore char
+		}
+		ch = f.peek();							// peek at next char
+	}
+	f.close();
 
+	print_int_grid(11+1, 10+1, ed_table);
+
+	/* DELETE LATER: read in dummy bt_table for testing */
+	row = 0; column = 0;
+	char** bt_table = create_char_grid(11+1, 10+1);
+	f.open("test_bt_table.txt");
+	ch = f.get();								// peek at first char
+	while (ch != EOF) {
+		if (ch != ' ' && ch != '\n') {			// if char starts a number,
+			bt_table[row][column] = ch;			// place in int grid
+			column++;							// move on to next square
+			if (column >= 11) {					// if end of row,
+				column = 0;
+				row++;							// move on to next row
+			}
+		}
+		ch = f.get();							// peek at next char
+	}
+	f.close();
+
+	print_char_grid(11+1, 10+1, bt_table);
+
+	/* DELETE LATER: testing that get_alignment works with the dummy data */
+	string* alignment;
+	alignment = get_alignment("exponential", "polynomial", ed_table, bt_table);
+	for (int i = 0; i < 2; i++) {
+		cout << alignment[i] << endl;
+	}
 
 	free_int_grid(5, 5, cost_table);
 	free_string_grid(count, sequence_table);
-	
+	free_int_grid(11+1, 10+1, ed_table);
+	free_char_grid(11+1, 10+1, bt_table);
+	delete [] alignment;
 	return 0;
 }
 
@@ -217,7 +270,7 @@ void print_string_grid(int num_pairs, string** arr) {
 }
 
 
-
+/* Looks up cost for particular pair of characters from the cost table */
 int find_cost(char one, char two, int** cost_table){
 	int idx1 = 0, idx2 = 0;
 	string alpha = "-ATGC";
@@ -232,3 +285,46 @@ int find_cost(char one, char two, int** cost_table){
 	return cost_table[idx1][idx2];
 }
 
+
+/* Returns alignment (two new strings) between two original strings, based on
+ * the completed edit distance table and the completed backtrace table */
+string* get_alignment(string str1, string str2, int** ed_table, char** bt_table) {
+	string* alignment = new string[2]; 			// hold the final two strings
+	string align1 = "";
+	string align2 = "";
+	int i = str1.length();						// first cell: bottom right
+	int j = str2.length();
+	int old1 = str1.length() - 1;				// first pair: ending chars
+	int old2 = str2.length() - 1;
+
+	for (int x = 0; x < str1.length() + str2.length(); x++) {
+		cout << "examining " << i << ", " << j << ": " << bt_table[i][j] << endl;
+		if (bt_table[i][j] == 'd') {			// there was a deletion
+			align1 = str1[old1] + align1;
+			align2 = "-" + align2;
+			old1--;
+			i--;
+		}
+		else if (bt_table[i][j] == 'i') {		// there was an insertion
+			align1 = "-" + align1;
+			align2 = str2[old2] + align2;
+			old2--;
+			j--;
+		}
+		else {									// there was an alignment
+			align1 = str1[old1] + align1;
+			align2 = str2[old2] + align2;
+			old1--; old2--;
+			i--; j--;
+		}
+		cout << "align1 is now " << align1 << endl;
+		cout << "align2 is now " << align2 << endl;
+		if (i == 0 && j == 0) {
+			break;
+		}
+	}
+	alignment[0] = align1;
+	alignment[1] = align2;
+
+	return alignment;
+}
