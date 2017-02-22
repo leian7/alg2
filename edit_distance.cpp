@@ -115,8 +115,8 @@ int main(int argc, char** argv) {
 	//cout << "DONE PRINTING THE SEQ TABLE" << endl;
 	
 	//test for the editingDistance function	
-	string str2 = "polynomial";
-	string str1 = "exponential";
+	string str2 = "intention";
+	string str1 = "execution";
 	int **cost_test = create_int_grid(12,12);
 	for(int i = 0; i < 12; i++){
 		for(int j = 0; j < 12; j++){
