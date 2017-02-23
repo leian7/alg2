@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 	char ch;									// for reading grids from files
 	int number;									// for reading nums from files
 	fstream f;
-	ofstream myfile("output.txt");
+	ofstream myfile("imp2output.txt");
 
 	int** cost_table = create_int_grid(5, 5);	// guaranteed size
 	string** sequence_table;					// array ver. of input file
