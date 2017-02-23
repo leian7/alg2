@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
 	char ch;									// for reading grids from files
 	int number;									// for reading nums from files
 	fstream f;
+	ofstream myfile("output.txt");
 
 	int** cost_table = create_int_grid(5, 5);	// guaranteed size
 	string** sequence_table;					// array ver. of input file
@@ -73,7 +74,6 @@ int main(int argc, char** argv) {
 
 	f.close();
 
-	print_int_grid(5, 5, cost_table);
 	
 	// read the input file and populate a ``num_pairs`` x 2 table of just the
 	// strings:
@@ -114,16 +114,8 @@ int main(int argc, char** argv) {
 	cout << "DONE PRINTING THE SEQ TABLE" << endl;
 	i = 0; j = 0; */
 
-	cout <<	sequence_table[0][0] << endl;
-	cout << sequence_table[0][1] << endl;
-
-	cout << "len 1: " << sequence_table[0][0].length() << endl;
-	cout << "len 2: " << sequence_table[0][1].length() << endl;
-
-	cout << sequence_table[0][0][sequence_table[0][0].length()-1] << endl;
-	cout << sequence_table[0][1][sequence_table[0][1].length()-1] << endl;
 	// for each pair,
-	for (int i = 0; i < 1; i++) { 
+	for (int i = 0; i < count; i++) { 
 		int** ed_table = create_int_grid(sequence_table[i][0].length()+1,
 										 sequence_table[i][1].length()+1);
 		char** bt_table = create_char_grid(sequence_table[i][0].length()+1,
@@ -134,14 +126,16 @@ int main(int argc, char** argv) {
 											   sequence_table[i][1],
 											   cost_table, bt_table, ed_table);
 
-		print_int_grid(sequence_table[i][0].length()+1,
-					   sequence_table[i][1].length()+1, ed_table);
+/*		print_int_grid(sequence_table[i][0].length()+1,
+					   sequence_table[i][1].length()+1, ed_table); */
 
 		string* alignment;
 		alignment = get_alignment(sequence_table[i][0], sequence_table[i][1],
 								  ed_table, bt_table);
-		cout << alignment[0] << endl;
-		cout << alignment[1] << ed_table[sequence_table[i][0].length()][sequence_table[i][1].length()] << endl;
+
+		if (myfile.is_open()) {
+			myfile << alignment[0] << "," << alignment[1] << ":" << ed_table[sequence_table[i][0].length()][sequence_table[i][1].length()] << endl;
+		}
 
 		//free the dynamic memory
 		free_int_grid(sequence_table[i][0].length()+1,
@@ -150,6 +144,7 @@ int main(int argc, char** argv) {
 					   sequence_table[i][1].length()+1, bt_table);
 		delete [] alignment;
 	}
+	myfile.close();
 	free_int_grid(5, 5, cost_table);
 	free_string_grid(count, sequence_table);
 	return 0;
@@ -392,13 +387,13 @@ int **fill_in_edit_distance_table(string str1, string str2, int **cost_table,
 			ed_table[i][0] = 0;
 		}
 		else {
-			ed_table[i][0] = i * find_cost(str1[i-1], '-', cost_table);
+			ed_table[i][0] = ed_table[i-1][0] + find_cost(str1[i-1], '-', cost_table); 
 		}
 		bt_table[i][0] = 'd';
 	} 	// (deletions)
 	
 	for(int j = 1; j < str2.length() + 1; j++) {
-		ed_table[0][j] = j * find_cost('-', str2[j-1], cost_table);
+		ed_table[0][j] = ed_table[0][j-1] + find_cost('-', str2[j-1], cost_table); 
 		bt_table[0][j] = 'i';
 	}	// (insertions)
 	
