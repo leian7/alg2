@@ -3,7 +3,7 @@
 #include <string.h>
 #include <fstream>
 #include <iomanip>
-#include <sys/time.h>
+//#include <sys/time.h>
 using namespace std;
 
 
@@ -18,12 +18,8 @@ void print_char_grid(int, int, char**);
 void print_string_grid(int, string**);
 int find_cost(char, char, int**);
 string* get_alignment(string, string, int**, char**);
-int find_test_cost(char, char, int**);
 int minimum(int, int, int);
-int diff(char, char, int**);
 int** fill_in_edit_distance_table(string, string, int**, char**, int**);
-int** fill_test_in_edit_distance_table(string, string, int**, char**, int, int,
-									   int**);
 
 int main(int argc, char** argv) {
 	string cost_file;							// name of cost file
@@ -43,8 +39,8 @@ int main(int argc, char** argv) {
 	int i = 0;
 	int j = 0;
 	
-	// if files were provided, use them. Otherwise, use the default cost and
-	// input files given to us.
+	// if files were provided, use them (for timing the algorithm). Otherwise,
+	// use the default cost and input files given to us.
 	if (argc > 1) {
 		cost_file = argv[1];
 		input_file = argv[2];
@@ -106,38 +102,29 @@ int main(int argc, char** argv) {
 	}
 	f.close();
 
-	/* the following proves that the input file was successfully converted to
-	 * a num_pairs x 2 array of just strings. Commas are printed out for
-	 * readability.
-	 */
-/*	cout << "PRINTIN:G THE SEQ TABLE " << endl;	
-	print_string_grid(count, sequence_table);
-	cout << "DONE PRINTING THE SEQ TABLE" << endl;
-	i = 0; j = 0; */
-	/* Timing algorithm */
+	/* Timing algorithm 
 	int totalsec = 0;
 	int totalmicroSec = 0;
 	typedef struct timeval time;
-	
+	*/
 		
 	// for each pair,
 	for (int i = 0; i < count; i++) { 
 		int** ed_table = create_int_grid(sequence_table[i][0].length()+1, sequence_table[i][1].length()+1);
 		char** bt_table = create_char_grid(sequence_table[i][0].length()+1,sequence_table[i][1].length()+1);
-		time stop, start;
-		gettimeofday(&start, NULL);
+		//time stop, start;
+		//gettimeofday(&start, NULL);
 		
 		ed_table = fill_in_edit_distance_table(sequence_table[i][0],
 											   sequence_table[i][1],
 											   cost_table, bt_table, ed_table);
 
-/*		print_int_grid(sequence_table[i][0].length()+1,
-					   sequence_table[i][1].length()+1, ed_table); */
-
 		string* alignment;
 		alignment = get_alignment(sequence_table[i][0], sequence_table[i][1],
 								  ed_table, bt_table);
+		/*
 		gettimeofday(&stop, NULL);
+		
 		if(stop.tv_sec > start.tv_sec) {
 			cout << "seconds: " << stop.tv_sec-start.tv_sec << endl;
 			totalsec += stop.tv_sec-start.tv_sec ;
@@ -147,11 +134,11 @@ int main(int argc, char** argv) {
 			totalmicroSec +=  stop.tv_usec-start.tv_usec;
 		
 		} 
-		
+		*/
 		if (myfile.is_open()) {
 			myfile << alignment[0] << "," << alignment[1] << ":" << ed_table[sequence_table[i][0].length()][sequence_table[i][1].length()] << endl;
 		}
-
+		
 		//free the dynamic memory
 		free_int_grid(sequence_table[i][0].length()+1,
 					  sequence_table[i][1].length()+1, ed_table);
@@ -161,7 +148,7 @@ int main(int argc, char** argv) {
 	}
 	myfile.close();
 	
-	cout <<"totalmicroSec : "<< totalmicroSec <<" totalsec : " <<totalsec << endl;
+	//cout <<"totalmicroSec : "<< totalmicroSec <<" totalsec : " <<totalsec << endl;
 	
 		
 	free_int_grid(5, 5, cost_table);
@@ -268,15 +255,12 @@ void print_string_grid(int num_pairs, string** arr) {
 int find_test_cost(char one, char two, int** cost_table){
 	int idx1 = 0, idx2 = 0;
 	string alpha = "-xucetion";
-//	cout << " char one " << one << "	" << "char two " << two << endl;
 	for(int i = 0; i < 12; i++){
 		if(one == alpha[i]){
 			idx1 = i;
-			//cout << " index <<"<<i<<"<< : " << idx1 << endl;
 		}
 		if(two == alpha[i]){
 			idx2 = i;
-			//cout << " index <<"<<i<<"<< : " << idx2 << endl;
 		}
 	}
 	return cost_table[idx1][idx2];
@@ -344,58 +328,6 @@ int minimum(int i, int j, int k){
 }
 
 
-int **fill_test_in_edit_distance_table(string str1, string str2, int **cost_table, char **bt_table, int m, int n, int** ed_table){ 
-	//base cases:
-	//print_int_grid(12,12,cost_table);
-	int cost_i = 0, cost_d = 0, cost_a = 0;
-	ed_table[0][0] = 0;
-	for (int i = 1; i < m; i++){
-		//cout << " find " << find_test_cost(str1[i],'-',cost_table) << endl;
-		ed_table[i][0] = i * find_test_cost(str1[i-1], '-', cost_table);
-		//cout << " ed_table [" << i << "]" << "[" << 0 << "]" << ": " << ed_table[i][0] << endl;
-		bt_table[i][0] = 'd';
-	}	// (deletions)
-	
-	for(int j = 1; j < n; j++){
-		ed_table[0][j] = j * find_test_cost('-', str2[j-1], cost_table);
-		//cout << " ed_table [" <<0 << "]" << "[" << j << "]" << ": " << ed_table[0][j] << endl;
-		bt_table[0][j] = 'i';
-	}	// (insertions)
-	
-	//main algorithm:
-	for (int i = 1; i < m; i++){
-		for (int j = 1; j < n; j++) {
-			// Find the costs of deletion, insertion, and alignment for this
-			// particular pair of characters, str1[i] and str2[j]:		
-			cost_d = find_test_cost(str1[i-1], '-', cost_table);
-			cost_i = find_test_cost('-', str2[j-1], cost_table);
-			cost_a = find_test_cost(str1[i-1], str2[j-1], cost_table);
-
-			// cout << " cost_d, cost_i, cost_a : " << cost_d << cost_i << cost_a << endl;
-			// Choose best edit distance for pair:
-			ed_table[i][j] = minimum(ed_table[i-1][j] + cost_d,
-									 ed_table[i][j-1] + cost_i,
-									 ed_table[i-1][j-1] + cost_a);
-
-			// Record operation for backtrace:
-			if (ed_table[i][j] == ed_table[i-1][j] + cost_d) {
-				bt_table[i][j] = 'd';
-			}
-			else if (ed_table[i][j] == ed_table[i][j-1] + cost_i) {
-				bt_table[i][j] = 'i';
-			}
-			else {		// (alignment/substitution/diagonal)
-				bt_table[i][j] = 'a';
-			}
-			//cout << " ed_table [" << i << "]" << "[" << j << "]" << ": " << ed_table[i][j] << endl;
-		}
-	}
-	// return ed_table, the entire edit distance table. Best edit distance is
-	// ed_table[m][n];
-	return ed_table;
-}
-
-
 int **fill_in_edit_distance_table(string str1, string str2, int **cost_table,
 								  char **bt_table, int **ed_table) { 
 	//base cases:
@@ -416,7 +348,7 @@ int **fill_in_edit_distance_table(string str1, string str2, int **cost_table,
 		bt_table[0][j] = 'i';
 	}	// (insertions)
 	
-	//main algorithm (EXTRA CHECK THE i's AND j's???)
+	//main algorithm
 	for (int i = 1; i < str1.length() + 1; i++) {
 		for (int j = 1; j < str2.length() + 1; j++) {
 			// Find the costs of deletion, insertion, and alignment for this
@@ -424,7 +356,6 @@ int **fill_in_edit_distance_table(string str1, string str2, int **cost_table,
 			cost_d = find_cost(str1[i-1], '-', cost_table);
 			cost_i = find_cost('-', str2[j-1], cost_table);
 			cost_a = find_cost(str1[i-1], str2[j-1], cost_table);
-			// cout << " cost_d, cost_i, cost_a : " << cost_d << cost_i << cost_a << endl;
 			// Choose best edit distance for pair:
 			ed_table[i][j] = minimum(ed_table[i-1][j] + cost_d, ed_table[i][j-1] + cost_i, ed_table[i-1][j-1] + cost_a);
 
