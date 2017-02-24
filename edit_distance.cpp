@@ -3,6 +3,7 @@
 #include <string.h>
 #include <fstream>
 #include <iomanip>
+#include <sys/time.h>
 using namespace std;
 
 
@@ -113,15 +114,19 @@ int main(int argc, char** argv) {
 	print_string_grid(count, sequence_table);
 	cout << "DONE PRINTING THE SEQ TABLE" << endl;
 	i = 0; j = 0; */
-
+	/* Timing algorithm */
+	int totalsec = 0;
+	int totalmicroSec = 0;
+	typedef struct timeval time;
+	
+		
 	// for each pair,
 	for (int i = 0; i < count; i++) { 
-		int** ed_table = create_int_grid(sequence_table[i][0].length()+1,
-										 sequence_table[i][1].length()+1);
-		char** bt_table = create_char_grid(sequence_table[i][0].length()+1,
-										   sequence_table[i][1].length()+1);
-	
-	
+		int** ed_table = create_int_grid(sequence_table[i][0].length()+1, sequence_table[i][1].length()+1);
+		char** bt_table = create_char_grid(sequence_table[i][0].length()+1,sequence_table[i][1].length()+1);
+		time stop, start;
+		gettimeofday(&start, NULL);
+		
 		ed_table = fill_in_edit_distance_table(sequence_table[i][0],
 											   sequence_table[i][1],
 											   cost_table, bt_table, ed_table);
@@ -132,7 +137,17 @@ int main(int argc, char** argv) {
 		string* alignment;
 		alignment = get_alignment(sequence_table[i][0], sequence_table[i][1],
 								  ed_table, bt_table);
-
+		gettimeofday(&stop, NULL);
+		if(stop.tv_sec > start.tv_sec) {
+			cout << "seconds: " << stop.tv_sec-start.tv_sec << endl;
+			totalsec += stop.tv_sec-start.tv_sec ;
+		}
+		else {
+			cout << "micro: " << stop.tv_usec-start.tv_usec << endl;
+			totalmicroSec +=  stop.tv_usec-start.tv_usec;
+		
+		} 
+		
 		if (myfile.is_open()) {
 			myfile << alignment[0] << "," << alignment[1] << ":" << ed_table[sequence_table[i][0].length()][sequence_table[i][1].length()] << endl;
 		}
@@ -145,6 +160,10 @@ int main(int argc, char** argv) {
 		delete [] alignment;
 	}
 	myfile.close();
+	
+	cout <<"totalmicroSec : "<< totalmicroSec <<" totalsec : " <<totalsec << endl;
+	
+		
 	free_int_grid(5, 5, cost_table);
 	free_string_grid(count, sequence_table);
 	return 0;
