@@ -3,7 +3,7 @@ CS 325 Implementation Assignment 2
 Yingshi Huang && Anne Lei
 
 To compile and run the program:
-``g++ -o [executable name] edit_distance.cpp``
+``g++ -o [executable name] edit_distance.cpp`` and
 ``./[executable name]``
 
 If you want to use a cost file and input file other than imp2cost.txt and
