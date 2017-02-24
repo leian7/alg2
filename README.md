@@ -3,13 +3,13 @@ CS 325 Implementation Assignment 2
 Yingshi Huang && Anne Lei
 
 To compile and run the program:
-g++ -o [executable name] edit_distance.cpp
-./[executable name]
+``g++ -o [executable name] edit_distance.cpp``
+``./[executable name]``
 
 If you want to use a cost file and input file other than imp2cost.txt and
 imp2input.txt (see last paragraph for info on timing), you can provide
 alternate files like this:
-./[executable name] [name of cost file] [name of input file]
+``./[executable name] [name of cost file] [name of input file]``
 
 Execution will output results to imp2output.txt; if it does not exist
 beforehand, it will be generated. A file of this name is included here
